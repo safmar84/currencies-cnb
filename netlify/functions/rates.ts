@@ -30,10 +30,6 @@ function createSuccessResponse(
   };
 }
 
-function isCacheFresh(now = new Date()) {
-  return cachedRates !== null && cachedRates.expiresAt > now.getTime();
-}
-
 export function resetRatesCacheForTests() {
   cachedRates = null;
 }
