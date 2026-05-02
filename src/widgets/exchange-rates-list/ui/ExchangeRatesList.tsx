@@ -1,5 +1,10 @@
 import styled from "styled-components";
 import { useRatesQuery } from "../../../entities/exchange-rate";
+import { getRateFlag } from "../../../shared/lib/rate-flag";
+
+function formatRate(rate: number) {
+  return rate.toFixed(3);
+}
 
 export function ExchangeRatesList() {
   const { data, isPending, isError, error } = useRatesQuery();
@@ -25,12 +30,12 @@ export function ExchangeRatesList() {
       <RatesList>
         {data.rows.map((row) => (
           <RateItem key={row.code}>
-            <Code>{row.code}</Code>
-            <span>
+            <Label>
+              <Flag aria-hidden="true">{getRateFlag(row.country)}</Flag>
               {row.country} - {row.currency}
-            </span>
+            </Label>
             <Rate>
-              {row.amount} {row.code} = {row.rate} CZK
+              {row.amount} {row.code} = {formatRate(row.rate)} CZK
             </Rate>
           </RateItem>
         ))}
@@ -70,8 +75,15 @@ const RateItem = styled.li`
   border-radius: ${({ theme }) => theme.radius.listItem};
 `;
 
-const Code = styled.strong`
-  font-size: ${({ theme }) => theme.typography.codeSize};
+const Label = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.itemGap};
+`;
+
+const Flag = styled.span`
+  font-size: 1.25em;
+  line-height: 1;
 `;
 
 const Rate = styled.span`

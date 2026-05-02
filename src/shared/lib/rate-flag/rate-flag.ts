@@ -1,0 +1,37 @@
+const rateFlagsByCountry: Record<string, string> = {
+  Australia: "🇦🇺",
+  Belgium: "🇧🇪",
+  Brazil: "🇧🇷",
+  Canada: "🇨🇦",
+  China: "🇨🇳",
+  Denmark: "🇩🇰",
+  EMU: "🇪🇺",
+  Hongkong: "🇭🇰",
+  Hungary: "🇭🇺",
+  Iceland: "🇮🇸",
+  IMF: "🌐",
+  India: "🇮🇳",
+  Indonesia: "🇮🇩",
+  Israel: "🇮🇱",
+  Japan: "🇯🇵",
+  Malaysia: "🇲🇾",
+  Mexico: "🇲🇽",
+  "New Zealand": "🇳🇿",
+  Norway: "🇳🇴",
+  Philippines: "🇵🇭",
+  Poland: "🇵🇱",
+  Romania: "🇷🇴",
+  Singapore: "🇸🇬",
+  "South Africa": "🇿🇦",
+  "South Korea": "🇰🇷",
+  Sweden: "🇸🇪",
+  Switzerland: "🇨🇭",
+  Thailand: "🇹🇭",
+  Turkey: "🇹🇷",
+  "United Kingdom": "🇬🇧",
+  USA: "🇺🇸",
+};
+
+export function getRateFlag(country: string) {
+  return rateFlagsByCountry[country] ?? "🏳️";
+}
