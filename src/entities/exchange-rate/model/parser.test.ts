@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { parseRates } from "./parser";
 import {
   historicalDailyRates,
   historicalDailyRatesText,
   validDailyRates,
   validDailyRatesText,
-} from "../../test/fixtures/rates";
+} from "../../../shared/lib/testing/fixtures";
+import { parseRates } from "./parser";
 
 describe("parseRates", () => {
   it("parses a valid CNB daily payload", () => {

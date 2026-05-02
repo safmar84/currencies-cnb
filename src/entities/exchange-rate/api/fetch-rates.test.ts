@@ -1,6 +1,6 @@
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
-import { validDailyRates } from "../../test/fixtures/rates";
-import { fetchRates } from "./api";
+import { validDailyRates } from "../../../shared/lib/testing/fixtures";
+import { fetchRates } from "./fetch-rates";
 
 const fetchMock = vi.fn<typeof fetch>();
 

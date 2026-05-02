@@ -38,22 +38,39 @@ Overall: Keep the code simple and the UI nice and easy to use for the user.
 
 ## Architecture
 
-The application is intentionally split into a few small layers:
+The project now follows a **layered architecture** with a lightweight **Feature-Sliced Design (FSD)** direction, plus a small **Netlify proxy/BFF layer** in front of the external CNB endpoint.
 
-1. **Frontend UI (`src/App.tsx`)**
-   - renders loading, error, and success states
-   - displays the current exchange rates list
-2. **Frontend data layer (`src/features/rates/api.ts`, `useRatesQuery.ts`, `src/lib/queryClient.ts`)**
-   - uses React Query for fetching and caching
-   - keeps the browser-side API access limited to `/api/rates`
-3. **Proxy/backend layer (`netlify/functions/rates.ts`)**
+The application is split into these responsibilities:
+
+1. **App layer (`src/app`)**
+   - provides application-level setup such as the shared React Query client
+2. **Pages layer (`src/pages`)**
+   - composes the full screen currently rendered by the app (`rates-page`)
+3. **Widgets layer (`src/widgets`)**
+   - contains larger UI blocks such as the exchange rates list
+4. **Entities layer (`src/entities/exchange-rate`)**
+   - contains the exchange-rate domain contract, parser, API client, and React Query hook
+5. **Shared layer (`src/shared`)**
+   - stores shared testing fixtures and will host other reusable cross-cutting utilities later
+6. **Proxy/backend layer (`netlify/functions/rates.ts`)**
    - runs as a Netlify Function
    - fetches the CNB TXT endpoint on the server side
    - avoids browser-side CORS and keeps TXT parsing out of the UI layer
-4. **Parsing and validation layer (`src/features/rates/parser.ts`, `types.ts`)**
-   - `parseRates()` converts raw CNB TXT into a normalized JavaScript object
-   - Zod validates the parsed object and the frontend JSON response shape at runtime
-   - this keeps the contract explicit between the Netlify function and the frontend
+
+At the moment there is no implemented `features/` slice yet. The future CZK conversion behavior is intended to live there as a real user-facing feature.
+
+### Architectural patterns in use
+
+- **Layered architecture**
+  - UI, data fetching, proxy/backend, and parsing/validation have clearly separated responsibilities
+- **Feature-Sliced Design direction**
+  - the code is organized into `app / pages / widgets / entities / shared`
+  - the current domain logic lives in `entities/exchange-rate`, while future user actions such as the converter belong in `features`
+- **Proxy / BFF-lite**
+  - the frontend does not call the CNB TXT endpoint directly
+  - Netlify Functions expose a stable `/api/rates` interface tailored to the UI
+- **Adapter / anti-corruption layer**
+  - `parseRates()` isolates the application from the raw external TXT format and converts it into an internal typed contract
 
 ### Why these choices
 
@@ -78,23 +95,36 @@ The application is intentionally split into a few small layers:
 ├── vite.config.ts
 └── src
     ├── App.tsx
-    ├── features/
-    │   └── rates/
-    │       ├── api.test.ts
-    │       ├── api.ts
-    │       ├── parser.test.ts
-    │       ├── parser.ts
-    │       ├── types.test.ts
-    │       ├── types.ts
-    │       └── useRatesQuery.ts
+    ├── app/
+    │   └── providers/
+    │       └── query-client/
+    ├── entities/
+    │   └── exchange-rate/
+    │       ├── api/
+    │       │   ├── fetch-rates.test.ts
+    │       │   └── fetch-rates.ts
+    │       └── model/
+    │           ├── parser.test.ts
+    │           ├── parser.ts
+    │           ├── types.test.ts
+    │           ├── types.ts
+    │           └── use-rates-query.ts
     ├── index.css
-    ├── lib/
-    │   └── queryClient.ts
     ├── main.tsx
-    ├── test/
-    │   └── fixtures/
-    │       └── rates.ts
-    └── vite-env.d.ts
+    ├── pages/
+    │   └── rates-page/
+    │       └── ui/
+    │           └── RatesPage.tsx
+    ├── shared/
+    │   └── lib/
+    │       └── testing/
+    │           └── fixtures/
+    │               └── rates.ts
+    ├── vite-env.d.ts
+    └── widgets/
+        └── exchange-rates-list/
+            └── ui/
+                └── ExchangeRatesList.tsx
 ```
 
 ## Scripts
@@ -131,13 +161,13 @@ pnpm dev:vite
 
 The test strategy is layered to match the current architecture:
 
-1. `src/features/rates/parser.test.ts`
+1. `src/entities/exchange-rate/model/parser.test.ts`
    - unit tests for `parseRates()`
    - covers valid CNB TXT payloads, historical format handling, and invalid row/header/date cases
-2. `src/features/rates/types.test.ts`
+2. `src/entities/exchange-rate/model/types.test.ts`
    - schema tests for `RatesSchema`
    - covers valid vs invalid JSON payloads
-3. `src/features/rates/api.test.ts`
+3. `src/entities/exchange-rate/api/fetch-rates.test.ts`
    - frontend API client tests for `fetchRates()`
    - verifies `/api/rates` is called and the JSON response is validated
 4. `netlify/functions/rates.test.ts`
@@ -147,7 +177,7 @@ The test strategy is layered to match the current architecture:
 Shared happy-path fixtures live in:
 
 ```text
-src/test/fixtures/rates.ts
+src/shared/lib/testing/fixtures/rates.ts
 ```
 
 These fixtures are reused across parser, schema, and proxy tests to keep the payload contract consistent.

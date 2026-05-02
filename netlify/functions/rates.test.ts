@@ -8,7 +8,7 @@ import { handler } from "./rates";
 import {
   validDailyRates,
   validDailyRatesText,
-} from "../../src/test/fixtures/rates";
+} from "../../src/shared/lib/testing/fixtures";
 
 const fetchMock = vi.fn<typeof fetch>();
 

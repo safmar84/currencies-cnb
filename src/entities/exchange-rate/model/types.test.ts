@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { validDailyRates } from "../../../shared/lib/testing/fixtures";
 import { RatesSchema } from "./types";
-import { validDailyRates } from "../../test/fixtures/rates";
 
 describe("RatesSchema", () => {
   const validPayload = {

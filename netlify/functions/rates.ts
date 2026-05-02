@@ -1,5 +1,5 @@
 import type { Handler } from "@netlify/functions";
- import { parseRates } from "../../src/features/rates/parser";
+ import { parseRates } from "../../src/entities/exchange-rate";
  
  const CNB_DAILY_URL =
    "https://www.cnb.cz/en/financial-markets/foreign-exchange-market/central-bank-exchange-rate-fixing/central-bank-exchange-rate-fixing/daily.txt";
