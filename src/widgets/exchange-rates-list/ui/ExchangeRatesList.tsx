@@ -40,23 +40,23 @@ export function ExchangeRatesList() {
 }
 
 const Meta = styled.p`
-  margin: 0 0 1rem;
-  color: #475569;
+  margin: 0 0 ${({ theme }) => theme.spacing.metaMarginBottom};
+  color: ${({ theme }) => theme.colors.mutedText};
 `;
 
 const Message = styled.p`
   margin: 0;
-  color: #334155;
+  color: ${({ theme }) => theme.colors.text};
 `;
 
 const ErrorMessage = styled.p`
   margin: 0;
-  color: #b91c1c;
+  color: ${({ theme }) => theme.colors.error};
 `;
 
 const RatesList = styled.ul`
   display: grid;
-  gap: 0.75rem;
+  gap: ${({ theme }) => theme.spacing.listGap};
   padding: 0;
   margin: 0;
   list-style: none;
@@ -64,17 +64,17 @@ const RatesList = styled.ul`
 
 const RateItem = styled.li`
   display: grid;
-  gap: 0.25rem;
-  padding: 1rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
+  gap: ${({ theme }) => theme.spacing.itemGap};
+  padding: ${({ theme }) => theme.spacing.itemPadding};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.radius.listItem};
 `;
 
 const Code = styled.strong`
-  font-size: 1rem;
+  font-size: ${({ theme }) => theme.typography.codeSize};
 `;
 
 const Rate = styled.span`
-  color: #0f172a;
+  color: ${({ theme }) => theme.colors.text};
   font-weight: 600;
 `;

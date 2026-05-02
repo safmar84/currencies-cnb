@@ -10,6 +10,8 @@ The project currently includes:
 - React Query for data fetching
 - Netlify function proxy for the CNB TXT endpoint
 - Zod schemas for runtime payload validation
+- automatic light/dark theme based on the operating system preference
+- semantic UI tokens for colors, spacing, radius, layout, typography, and shadow
 - current UI that loads and renders exchange rates
 - unit tests for parser, schema, frontend API client, and Netlify proxy
 
@@ -43,7 +45,7 @@ The project now follows a **layered architecture** with a lightweight **Feature-
 The application is split into these responsibilities:
 
 1. **App layer (`src/app`)**
-   - provides application-level setup such as the shared React Query client
+   - provides application-level setup such as the shared React Query client and theme provider wiring
 2. **Pages layer (`src/pages`)**
    - composes the full screen currently rendered by the app (`rates-page`)
 3. **Widgets layer (`src/widgets`)**
@@ -51,7 +53,8 @@ The application is split into these responsibilities:
 4. **Entities layer (`src/entities/exchange-rate`)**
    - contains the exchange-rate domain contract, parser, API client, and React Query hook
 5. **Shared layer (`src/shared`)**
-   - stores shared testing fixtures and will host other reusable cross-cutting utilities later
+   - stores shared testing fixtures and theme configuration
+   - exposes semantic UI tokens used by the styled-components theme
 6. **Proxy/backend layer (`netlify/functions/rates.ts`)**
    - runs as a Netlify Function
    - fetches the CNB TXT endpoint on the server side
@@ -71,6 +74,9 @@ At the moment there is no implemented `features/` slice yet. The future CZK conv
   - Netlify Functions expose a stable `/api/rates` interface tailored to the UI
 - **Adapter / anti-corruption layer**
   - `parseRates()` isolates the application from the raw external TXT format and converts it into an internal typed contract
+- **Theme tokens + system theme detection**
+  - semantic UI tokens are defined once and consumed across the UI
+  - the app automatically follows the OS light/dark preference through `prefers-color-scheme`
 
 ### Why these choices
 
@@ -78,6 +84,8 @@ At the moment there is no implemented `features/` slice yet. The future CZK conv
 - **React Query** handles async state, caching, and retry behavior cleanly
 - **Netlify Functions** provide a minimal proxy/backend layer without introducing a full backend framework
 - **Zod** adds runtime safety for external data coming from the CNB endpoint
+- **Semantic theme tokens** keep spacing, typography, radius, layout, and colors centralized
+- **System light/dark detection** improves UX without introducing manual theme state yet
 - **Shared test fixtures** keep parser, schema, API client, and proxy tests aligned around the same payload contract
 
 ### Project structure
@@ -97,13 +105,17 @@ At the moment there is no implemented `features/` slice yet. The future CZK conv
     ├── App.tsx
     ├── app/
     │   └── providers/
-    │       └── query-client/
+    │       ├── query-client/
+    │       └── theme/
     ├── entities/
     │   └── exchange-rate/
     │       ├── api/
     │       │   ├── fetch-rates.test.ts
+    │       │   ├── index.ts
     │       │   └── fetch-rates.ts
+    │       ├── index.ts
     │       └── model/
+    │           ├── index.ts
     │           ├── parser.test.ts
     │           ├── parser.ts
     │           ├── types.test.ts
@@ -113,16 +125,24 @@ At the moment there is no implemented `features/` slice yet. The future CZK conv
     ├── main.tsx
     ├── pages/
     │   └── rates-page/
+    │       ├── index.ts
     │       └── ui/
     │           └── RatesPage.tsx
     ├── shared/
+    │   ├── config/
+    │   │   └── theme/
+    │   │       ├── index.ts
+    │   │       ├── styled.d.ts
+    │   │       └── theme.ts
     │   └── lib/
     │       └── testing/
     │           └── fixtures/
+    │               ├── index.ts
     │               └── rates.ts
     ├── vite-env.d.ts
     └── widgets/
         └── exchange-rates-list/
+            ├── index.ts
             └── ui/
                 └── ExchangeRatesList.tsx
 ```
@@ -156,6 +176,25 @@ If you only need the Vite frontend without the Netlify function layer:
 ```bash
 pnpm dev:vite
 ```
+
+## UI theme and tokens
+
+The app uses `styled-components` theme support with semantic tokens and automatic OS theme detection.
+
+- theme provider wiring lives in `src/app/providers/theme/`
+- shared semantic theme tokens live in `src/shared/config/theme/`
+- the active theme follows `prefers-color-scheme`
+
+The current token groups are:
+
+- `colors`
+- `spacing`
+- `radius`
+- `layout`
+- `typography`
+- `shadow`
+
+The goal is to keep styled components free of ad-hoc visual values as much as possible and centralize UI decisions in the shared theme.
 
 ## Test structure
 
