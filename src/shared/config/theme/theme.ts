@@ -9,6 +9,8 @@ export const lightTheme: DefaultTheme = {
     text: "#0f172a",
     mutedText: "#475569",
     error: "#b91c1c",
+    accent: "#0f172a",
+    onAccent: "#f8fafc",
   },
   spacing: {
     pagePadding: "2rem",
@@ -19,10 +21,14 @@ export const lightTheme: DefaultTheme = {
     listGap: "0.75rem",
     itemGap: "0.25rem",
     itemPadding: "1rem",
+    controlGap: "0.125rem",
+    togglePaddingX: "0.5rem",
+    togglePaddingY: "0.35rem",
   },
   radius: {
     card: "1rem",
     listItem: "0.75rem",
+    control: "999px",
   },
   layout: {
     cardMaxWidth: "48rem",
@@ -31,6 +37,7 @@ export const lightTheme: DefaultTheme = {
     eyebrowSize: "0.875rem",
     titleSize: "2rem",
     codeSize: "1rem",
+    controlSize: "0.875rem",
   },
   shadow: {
     card: "0 20px 45px rgba(15, 23, 42, 0.08)",
@@ -46,6 +53,8 @@ export const darkTheme: DefaultTheme = {
     text: "#e2e8f0",
     mutedText: "#94a3b8",
     error: "#fca5a5",
+    accent: "#e2e8f0",
+    onAccent: "#020617",
   },
   spacing: {
     pagePadding: "2rem",
@@ -56,10 +65,14 @@ export const darkTheme: DefaultTheme = {
     listGap: "0.75rem",
     itemGap: "0.25rem",
     itemPadding: "1rem",
+    controlGap: "0.125rem",
+    togglePaddingX: "0.5rem",
+    togglePaddingY: "0.35rem",
   },
   radius: {
     card: "1rem",
     listItem: "0.75rem",
+    control: "999px",
   },
   layout: {
     cardMaxWidth: "48rem",
@@ -68,6 +81,7 @@ export const darkTheme: DefaultTheme = {
     eyebrowSize: "0.875rem",
     titleSize: "2rem",
     codeSize: "1rem",
+    controlSize: "0.875rem",
   },
   shadow: {
     card: "0 20px 45px rgba(2, 6, 23, 0.45)",

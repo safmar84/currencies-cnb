@@ -1,12 +1,18 @@
 import styled from "styled-components";
+import { ThemeModeToggle } from "../../../features/theme-mode-toggle";
 import { ExchangeRatesList } from "../../../widgets/exchange-rates-list";
 
 export function RatesPage() {
   return (
     <Page>
       <Card>
-        <Eyebrow>CNB Currency Converter</Eyebrow>
-        <Title>Exchange rates</Title>
+        <Header>
+          <div>
+            <Eyebrow>CNB Currency Converter</Eyebrow>
+            <Title>Exchange rates</Title>
+          </div>
+          <ThemeModeToggle />
+        </Header>
         <ExchangeRatesList />
       </Card>
     </Page>
@@ -26,6 +32,13 @@ const Card = styled.section`
   border-radius: ${({ theme }) => theme.radius.card};
   background: ${({ theme }) => theme.colors.surface};
   box-shadow: ${({ theme }) => theme.shadow.card};
+`;
+
+const Header = styled.header`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: ${({ theme }) => theme.spacing.cardPadding};
 `;
 
 const Eyebrow = styled.p`

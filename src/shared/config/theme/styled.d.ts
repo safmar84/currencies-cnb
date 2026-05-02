@@ -10,6 +10,8 @@ declare module "styled-components" {
       text: string;
       mutedText: string;
       error: string;
+      accent: string;
+      onAccent: string;
     };
     spacing: {
       pagePadding: string;
@@ -20,10 +22,14 @@ declare module "styled-components" {
       listGap: string;
       itemGap: string;
       itemPadding: string;
+      controlGap: string;
+      togglePaddingX: string;
+      togglePaddingY: string;
     };
     radius: {
       card: string;
       listItem: string;
+      control: string;
     };
     layout: {
       cardMaxWidth: string;
@@ -32,6 +38,7 @@ declare module "styled-components" {
       eyebrowSize: string;
       titleSize: string;
       codeSize: string;
+      controlSize: string;
     };
     shadow: {
       card: string;
