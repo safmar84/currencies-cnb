@@ -60,6 +60,7 @@ The application is split into these responsibilities:
 7. **Proxy/backend layer (`netlify/functions/rates.ts`)**
    - runs as a Netlify Function
    - fetches the CNB TXT endpoint on the server side
+   - caches parsed rates until the next expected CNB update window
    - avoids browser-side CORS and keeps TXT parsing out of the UI layer
 
 The current `features/` slice contains only the theme mode toggle. The future CZK conversion behavior is intended to live there as another user-facing feature.
@@ -74,6 +75,9 @@ The current `features/` slice contains only the theme mode toggle. The future CZ
 - **Proxy / BFF-lite**
   - the frontend does not call the CNB TXT endpoint directly
   - Netlify Functions expose a stable `/api/rates` interface tailored to the UI
+- **Daily-aware caching**
+  - both frontend and backend use the same refresh window derived from the CNB schedule
+  - rates stay cached until the next expected working-day update around 2:30 p.m. Prague time
 - **Adapter / anti-corruption layer**
   - `parseRates()` isolates the application from the raw external TXT format and converts it into an internal typed contract
 - **Theme tokens + system theme detection**
@@ -85,6 +89,7 @@ The current `features/` slice contains only the theme mode toggle. The future CZ
 - **Vite** keeps the frontend setup simple and lightweight
 - **React Query** handles async state, caching, and retry behavior cleanly
 - **Netlify Functions** provide a minimal proxy/backend layer without introducing a full backend framework
+- **Daily-aware caching** avoids repeatedly calling the CNB endpoint even though rates change only once per working day
 - **Zod** adds runtime safety for external data coming from the CNB endpoint
 - **Semantic theme tokens** keep spacing, typography, radius, layout, and colors centralized
 - **System light/dark detection + manual override** improve UX while keeping the theme logic simple
@@ -108,6 +113,8 @@ The current `features/` slice contains only the theme mode toggle. The future CZ
     ├── app/
     │   └── providers/
     │       ├── query-client/
+    │       │   ├── index.ts
+    │       │   └── query-client.ts
     │       └── theme/
     │           ├── AppThemeProvider.test.tsx
     │           ├── AppThemeProvider.tsx
@@ -147,6 +154,10 @@ The current `features/` slice contains only the theme mode toggle. The future CZ
     │   │       ├── styled.d.ts
     │   │       └── theme.ts
     │   └── lib/
+    │       ├── rates-cache/
+    │       │   ├── index.ts
+    │       │   ├── rates-cache.test.ts
+    │       │   └── rates-cache.ts
     │       └── testing/
     │           └── fixtures/
     │               ├── index.ts
@@ -211,6 +222,18 @@ The current token groups are:
 
 The goal is to keep styled components free of ad-hoc visual values as much as possible and centralize UI decisions in the shared theme.
 
+## Rates caching
+
+The rates flow is now cached in three layers:
+
+- the Netlify function keeps parsed rates in memory until the next expected CNB update window
+- the function also returns `Cache-Control` headers so shared HTTP caches do not hit the CNB endpoint on every request
+- React Query keeps the fetched rates fresh on the client until the same next expected refresh window
+
+The refresh window is based on the CNB documentation: rates are updated once per working day at around **2:30 p.m. Prague time**.
+
+If the app fetches rates after the expected publish time but the CNB still returns an older `publishedAt` value, those rates are treated as temporarily stale and cached only for **5 minutes**. This avoids freezing yesterday's rates until the next working day while still preventing excessive retry traffic.
+
 ## Test structure
 
 The test strategy is layered to match the current architecture:
@@ -226,8 +249,11 @@ The test strategy is layered to match the current architecture:
    - verifies `/api/rates` is called and the JSON response is validated
 4. `netlify/functions/rates.test.ts`
    - proxy tests for the Netlify handler
-   - covers successful upstream fetch, non-OK upstream response, thrown fetch errors, and invalid upstream payloads
-5. `src/app/providers/theme/AppThemeProvider.test.tsx`
+   - covers successful upstream fetch, in-memory cache reuse, cache expiry, 5-minute stale-data caching after the expected publish time, non-OK upstream response, thrown fetch errors, and invalid upstream payloads
+5. `src/shared/lib/rates-cache/rates-cache.test.ts`
+   - unit tests for computing cache expiry and the expected CNB publication date
+   - covers same-day refreshes, next-working-day refreshes, weekend handling, and short-cache behavior for stale `publishedAt` values
+6. `src/app/providers/theme/AppThemeProvider.test.tsx`
    - integration tests for theme mode behavior
    - covers restore from `localStorage`, persistence after change, `auto` mode, and reactions to `prefers-color-scheme` updates
 
@@ -242,6 +268,5 @@ These fixtures are reused across parser, schema, and proxy tests to keep the pay
 ## Planned next steps
 
 1. Refine the exchange rates UI
-2. Build the CZK conversion form
-3. Build the currency converter feature
-4. Prepare deployment and final polish
+2. Build the currency converter feature
+3. Prepare deployment and final polish

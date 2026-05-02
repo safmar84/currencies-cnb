@@ -4,7 +4,11 @@ import type {
   HandlerResponse,
 } from "@netlify/functions";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
-import { handler } from "./rates";
+import {
+  buildRatesCacheControlHeader,
+  getRatesCacheExpiresAt,
+} from "../../src/shared/lib/rates-cache";
+import { handler, resetRatesCacheForTests } from "./rates";
 import {
   validDailyRates,
   validDailyRatesText,
@@ -37,6 +41,8 @@ function parseJsonBody(result: HandlerResponse): unknown {
 
 afterEach(() => {
   fetchMock.mockReset();
+  resetRatesCacheForTests();
+  vi.useRealTimers();
 });
 
 afterAll(() => {
@@ -45,6 +51,11 @@ afterAll(() => {
 
 describe("rates netlify function", () => {
   it("returns parsed rates JSON when CNB request succeeds", async () => {
+    const now = new Date("2026-04-27T07:00:00Z");
+
+    vi.useFakeTimers();
+    vi.setSystemTime(now);
+
     fetchMock.mockResolvedValue(
       new Response(validDailyRatesText, {
         status: 200,
@@ -67,11 +78,95 @@ describe("rates netlify function", () => {
       statusCode: 200,
       headers: {
         "Content-Type": "application/json",
-        "Cache-Control": "public, max-age=1800",
+        "Cache-Control": buildRatesCacheControlHeader(
+          getRatesCacheExpiresAt(validDailyRates.publishedAt, now),
+          now,
+        ),
       },
     });
 
     expect(parseJsonBody(result)).toEqual(validDailyRates);
+  });
+
+  it("reuses cached rates until the next expected CNB refresh window", async () => {
+    const now = new Date("2026-04-27T07:00:00Z");
+
+    vi.useFakeTimers();
+    vi.setSystemTime(now);
+
+    fetchMock.mockResolvedValue(
+      new Response(validDailyRatesText, {
+        status: 200,
+        headers: { "Content-Type": "text/plain" },
+      }),
+    );
+
+    const firstResult = await invokeHandler();
+    const secondResult = await invokeHandler();
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(firstResult.headers?.["Cache-Control"]).toBe(
+      buildRatesCacheControlHeader(
+        getRatesCacheExpiresAt(validDailyRates.publishedAt, now),
+        now,
+      ),
+    );
+    expect(secondResult.headers?.["Cache-Control"]).toBe(
+      buildRatesCacheControlHeader(
+        getRatesCacheExpiresAt(validDailyRates.publishedAt, now),
+        now,
+      ),
+    );
+    expect(parseJsonBody(secondResult)).toEqual(validDailyRates);
+  });
+
+  it("refreshes the upstream data after the cached window expires", async () => {
+    vi.useFakeTimers();
+
+    fetchMock.mockResolvedValue(
+      new Response(validDailyRatesText, {
+        status: 200,
+        headers: { "Content-Type": "text/plain" },
+      }),
+    );
+
+    vi.setSystemTime(new Date("2026-04-27T13:00:00Z"));
+    await invokeHandler();
+
+    vi.setSystemTime(new Date("2026-04-28T12:31:00Z"));
+    await invokeHandler();
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("short-caches stale rates for only five minutes after the expected publish time", async () => {
+    const staleRatesText = `24 Apr 2026 #79
+Country|Currency|Amount|Code|Rate
+Australia|dollar|1|AUD|14.909`;
+    const now = new Date("2026-04-27T13:00:00Z");
+
+    vi.useFakeTimers();
+    vi.setSystemTime(now);
+
+    fetchMock.mockResolvedValue(
+      new Response(staleRatesText, {
+        status: 200,
+        headers: { "Content-Type": "text/plain" },
+      }),
+    );
+
+    const firstResult = await invokeHandler();
+
+    vi.setSystemTime(new Date("2026-04-27T13:04:00Z"));
+    await invokeHandler();
+
+    vi.setSystemTime(new Date("2026-04-27T13:06:00Z"));
+    await invokeHandler();
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(firstResult.headers?.["Cache-Control"]).toBe(
+      "public, max-age=300, s-maxage=300, stale-while-revalidate=60",
+    );
   });
 
   it("returns 502 when upstream responds with a non-ok status", async () => {
