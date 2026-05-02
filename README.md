@@ -12,8 +12,8 @@ The project currently includes:
 - Zod schemas for runtime payload validation
 - automatic and manual light/dark theme switching (`auto` / `light` / `dark`)
 - semantic UI tokens for colors, spacing, radius, layout, typography, and shadow
-- current UI that loads and renders exchange rates
-- unit and integration tests for parser, schema, frontend API client, Netlify proxy, and theme behavior
+- current UI that loads, converts, and renders exchange rates
+- unit and integration tests for parser, schema, frontend API client, Netlify proxy, theme behavior, and conversion logic
 
 ## Assignment
 
@@ -56,22 +56,22 @@ The application is split into these responsibilities:
    - stores shared testing fixtures and theme configuration
    - exposes semantic UI tokens used by the styled-components theme
 6. **Features layer (`src/features`)**
-   - contains user-facing behavior such as the theme mode toggle
+   - contains user-facing behavior such as the theme mode toggle and currency converter
 7. **Proxy/backend layer (`netlify/functions/rates.ts`)**
    - runs as a Netlify Function
    - fetches the CNB TXT endpoint on the server side
    - caches parsed rates until the next expected CNB update window
    - avoids browser-side CORS and keeps TXT parsing out of the UI layer
 
-The current `features/` slice contains only the theme mode toggle. The future CZK conversion behavior is intended to live there as another user-facing feature.
+The current `features/` slice contains the theme mode toggle and the currency converter feature.
 
 ### Architectural patterns in use
 
 - **Layered architecture**
   - UI, data fetching, proxy/backend, and parsing/validation have clearly separated responsibilities
 - **Feature-Sliced Design direction**
-  - the code is organized into `app / pages / widgets / features / entities / shared`
-  - the current domain logic lives in `entities/exchange-rate`, while user actions such as theme switching and the future converter belong in `features`
+   - the code is organized into `app / pages / widgets / features / entities / shared`
+   - the current domain logic lives in `entities/exchange-rate`, while user actions such as theme switching and currency conversion belong in `features`
 - **Proxy / BFF-lite**
   - the frontend does not call the CNB TXT endpoint directly
   - Netlify Functions expose a stable `/api/rates` interface tailored to the UI
@@ -136,6 +136,15 @@ The current `features/` slice contains only the theme mode toggle. The future CZ
     │           ├── types.ts
     │           └── use-rates-query.ts
     ├── features/
+    │   ├── currency-converter/
+    │   │   ├── index.ts
+    │   │   ├── model/
+    │   │   │   ├── convert-czk-to-currency.test.ts
+    │   │   │   ├── convert-czk-to-currency.ts
+    │   │   │   └── index.ts
+    │   │   └── ui/
+    │   │       ├── CurrencyAmountCard.tsx
+    │   │       └── CurrencyConverter.tsx
     │   └── theme-mode-toggle/
     │       ├── index.ts
     │       └── ui/
@@ -222,6 +231,15 @@ The current token groups are:
 
 The goal is to keep styled components free of ad-hoc visual values as much as possible and centralize UI decisions in the shared theme.
 
+## Currency converter
+
+The converter is implemented as a dedicated `features/currency-converter/` slice.
+
+- it uses one reusable amount/currency card UI for both sides
+- the **FROM** side is an editable CZK amount with a locked currency select
+- the **TO** side is a read-only converted amount with a selectable target currency
+- the output recalculates immediately when the source amount or target currency changes
+
 ## Rates caching
 
 The rates flow is now cached in three layers:
@@ -253,7 +271,10 @@ The test strategy is layered to match the current architecture:
 5. `src/shared/lib/rates-cache/rates-cache.test.ts`
    - unit tests for computing cache expiry and the expected CNB publication date
    - covers same-day refreshes, next-working-day refreshes, weekend handling, and short-cache behavior for stale `publishedAt` values
-6. `src/app/providers/theme/AppThemeProvider.test.tsx`
+6. `src/features/currency-converter/model/convert-czk-to-currency.test.ts`
+   - unit tests for the CZK-to-foreign-currency conversion formula
+   - covers rates quoted per one unit and per multiple units
+7. `src/app/providers/theme/AppThemeProvider.test.tsx`
    - integration tests for theme mode behavior
    - covers restore from `localStorage`, persistence after change, `auto` mode, and reactions to `prefers-color-scheme` updates
 
@@ -268,5 +289,4 @@ These fixtures are reused across parser, schema, and proxy tests to keep the pay
 ## Planned next steps
 
 1. Refine the exchange rates UI
-2. Build the currency converter feature
-3. Prepare deployment and final polish
+2. Prepare deployment and final polish

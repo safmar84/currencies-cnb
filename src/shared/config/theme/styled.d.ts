@@ -6,6 +6,7 @@ declare module "styled-components" {
     colors: {
       background: string;
       surface: string;
+      subtleSurface: string;
       border: string;
       text: string;
       mutedText: string;

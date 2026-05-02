@@ -5,6 +5,7 @@ export const lightTheme: DefaultTheme = {
   colors: {
     background: "#f8fafc",
     surface: "#ffffff",
+    subtleSurface: "#eef2f7",
     border: "#e2e8f0",
     text: "#0f172a",
     mutedText: "#475569",
@@ -49,6 +50,7 @@ export const darkTheme: DefaultTheme = {
   colors: {
     background: "#020617",
     surface: "#0f172a",
+    subtleSurface: "#172036",
     border: "#334155",
     text: "#e2e8f0",
     mutedText: "#94a3b8",

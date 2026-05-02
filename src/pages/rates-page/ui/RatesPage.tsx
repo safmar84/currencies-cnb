@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { CurrencyConverter } from "../../../features/currency-converter";
 import { ThemeModeToggle } from "../../../features/theme-mode-toggle";
 import { ExchangeRatesList } from "../../../widgets/exchange-rates-list";
 
@@ -9,10 +10,10 @@ export function RatesPage() {
         <Header>
           <div>
             <Eyebrow>CNB Currency Converter</Eyebrow>
-            <Title>Exchange rates</Title>
           </div>
           <ThemeModeToggle />
         </Header>
+        <CurrencyConverter />
         <ExchangeRatesList />
       </Card>
     </Page>
@@ -48,10 +49,4 @@ const Eyebrow = styled.p`
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-`;
-
-const Title = styled.h1`
-  margin: 0 0 ${({ theme }) => theme.spacing.titleMarginBottom};
-  font-size: ${({ theme }) => theme.typography.titleSize};
-  color: ${({ theme }) => theme.colors.text};
 `;

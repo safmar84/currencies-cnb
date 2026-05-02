@@ -23,9 +23,12 @@ export function ExchangeRatesList() {
 
   return (
     <>
-      <Meta>
-        Published at: <strong>{data.publishedAt}</strong> #{data.sequence}
-      </Meta>
+      <SectionHeader>
+        <SectionTitle>Exchange rates</SectionTitle>
+        <Meta>
+          Published at: <strong>{data.publishedAt}</strong> #{data.sequence}
+        </Meta>
+      </SectionHeader>
 
       <RatesList>
         {data.rows.map((row) => (
@@ -44,8 +47,27 @@ export function ExchangeRatesList() {
   );
 }
 
-const Meta = styled.p`
+const SectionHeader = styled.header`
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: ${({ theme }) => theme.spacing.listGap};
   margin: 0 0 ${({ theme }) => theme.spacing.metaMarginBottom};
+
+  @media (max-width: 720px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+`;
+
+const SectionTitle = styled.h2`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text};
+  font-size: 1.25rem;
+`;
+
+const Meta = styled.p`
+  margin: 0;
   color: ${({ theme }) => theme.colors.mutedText};
 `;
 
@@ -69,10 +91,17 @@ const RatesList = styled.ul`
 
 const RateItem = styled.li`
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
   gap: ${({ theme }) => theme.spacing.itemGap};
   padding: ${({ theme }) => theme.spacing.itemPadding};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.radius.listItem};
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
 `;
 
 const Label = styled.span`
@@ -89,4 +118,9 @@ const Flag = styled.span`
 const Rate = styled.span`
   color: ${({ theme }) => theme.colors.text};
   font-weight: 600;
+  text-align: right;
+
+  @media (max-width: 720px) {
+    text-align: left;
+  }
 `;
