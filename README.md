@@ -10,10 +10,10 @@ The project currently includes:
 - React Query for data fetching
 - Netlify function proxy for the CNB TXT endpoint
 - Zod schemas for runtime payload validation
-- automatic light/dark theme based on the operating system preference
+- automatic and manual light/dark theme switching (`auto` / `light` / `dark`)
 - semantic UI tokens for colors, spacing, radius, layout, typography, and shadow
 - current UI that loads and renders exchange rates
-- unit tests for parser, schema, frontend API client, and Netlify proxy
+- unit and integration tests for parser, schema, frontend API client, Netlify proxy, and theme behavior
 
 ## Assignment
 
@@ -55,20 +55,22 @@ The application is split into these responsibilities:
 5. **Shared layer (`src/shared`)**
    - stores shared testing fixtures and theme configuration
    - exposes semantic UI tokens used by the styled-components theme
-6. **Proxy/backend layer (`netlify/functions/rates.ts`)**
+6. **Features layer (`src/features`)**
+   - contains user-facing behavior such as the theme mode toggle
+7. **Proxy/backend layer (`netlify/functions/rates.ts`)**
    - runs as a Netlify Function
    - fetches the CNB TXT endpoint on the server side
    - avoids browser-side CORS and keeps TXT parsing out of the UI layer
 
-At the moment there is no implemented `features/` slice yet. The future CZK conversion behavior is intended to live there as a real user-facing feature.
+The current `features/` slice contains only the theme mode toggle. The future CZK conversion behavior is intended to live there as another user-facing feature.
 
 ### Architectural patterns in use
 
 - **Layered architecture**
   - UI, data fetching, proxy/backend, and parsing/validation have clearly separated responsibilities
 - **Feature-Sliced Design direction**
-  - the code is organized into `app / pages / widgets / entities / shared`
-  - the current domain logic lives in `entities/exchange-rate`, while future user actions such as the converter belong in `features`
+  - the code is organized into `app / pages / widgets / features / entities / shared`
+  - the current domain logic lives in `entities/exchange-rate`, while user actions such as theme switching and the future converter belong in `features`
 - **Proxy / BFF-lite**
   - the frontend does not call the CNB TXT endpoint directly
   - Netlify Functions expose a stable `/api/rates` interface tailored to the UI
@@ -76,7 +78,7 @@ At the moment there is no implemented `features/` slice yet. The future CZK conv
   - `parseRates()` isolates the application from the raw external TXT format and converts it into an internal typed contract
 - **Theme tokens + system theme detection**
   - semantic UI tokens are defined once and consumed across the UI
-  - the app automatically follows the OS light/dark preference through `prefers-color-scheme`
+  - the app follows the OS light/dark preference through `prefers-color-scheme` in `auto` mode and supports a persisted manual override
 
 ### Why these choices
 
@@ -85,7 +87,7 @@ At the moment there is no implemented `features/` slice yet. The future CZK conv
 - **Netlify Functions** provide a minimal proxy/backend layer without introducing a full backend framework
 - **Zod** adds runtime safety for external data coming from the CNB endpoint
 - **Semantic theme tokens** keep spacing, typography, radius, layout, and colors centralized
-- **System light/dark detection** improves UX without introducing manual theme state yet
+- **System light/dark detection + manual override** improve UX while keeping the theme logic simple
 - **Shared test fixtures** keep parser, schema, API client, and proxy tests aligned around the same payload contract
 
 ### Project structure
@@ -107,6 +109,11 @@ At the moment there is no implemented `features/` slice yet. The future CZK conv
     │   └── providers/
     │       ├── query-client/
     │       └── theme/
+    │           ├── AppThemeProvider.test.tsx
+    │           ├── AppThemeProvider.tsx
+    │           ├── GlobalStyle.tsx
+    │           ├── index.ts
+    │           └── theme-mode.tsx
     ├── entities/
     │   └── exchange-rate/
     │       ├── api/
@@ -121,6 +128,11 @@ At the moment there is no implemented `features/` slice yet. The future CZK conv
     │           ├── types.test.ts
     │           ├── types.ts
     │           └── use-rates-query.ts
+    ├── features/
+    │   └── theme-mode-toggle/
+    │       ├── index.ts
+    │       └── ui/
+    │           └── ThemeModeToggle.tsx
     ├── index.css
     ├── main.tsx
     ├── pages/
@@ -179,11 +191,14 @@ pnpm dev:vite
 
 ## UI theme and tokens
 
-The app uses `styled-components` theme support with semantic tokens and automatic OS theme detection.
+The app uses `styled-components` theme support with semantic tokens, OS theme detection, and a persisted theme mode toggle.
 
 - theme provider wiring lives in `src/app/providers/theme/`
+- the theme mode control lives in `src/features/theme-mode-toggle/`
 - shared semantic theme tokens live in `src/shared/config/theme/`
-- the active theme follows `prefers-color-scheme`
+- the active theme follows `prefers-color-scheme` in `auto` mode
+- the user can manually switch between `auto`, `light`, and `dark`
+- the selected mode is persisted in `localStorage`
 
 The current token groups are:
 
@@ -212,6 +227,9 @@ The test strategy is layered to match the current architecture:
 4. `netlify/functions/rates.test.ts`
    - proxy tests for the Netlify handler
    - covers successful upstream fetch, non-OK upstream response, thrown fetch errors, and invalid upstream payloads
+5. `src/app/providers/theme/AppThemeProvider.test.tsx`
+   - integration tests for theme mode behavior
+   - covers restore from `localStorage`, persistence after change, `auto` mode, and reactions to `prefers-color-scheme` updates
 
 Shared happy-path fixtures live in:
 
@@ -225,5 +243,5 @@ These fixtures are reused across parser, schema, and proxy tests to keep the pay
 
 1. Refine the exchange rates UI
 2. Build the CZK conversion form
-3. Add UI-level tests after the main UI is in place
+3. Build the currency converter feature
 4. Prepare deployment and final polish
