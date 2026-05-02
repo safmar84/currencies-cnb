@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import styled, { css } from "styled-components";
 
 export type CurrencyOption = {
@@ -18,6 +19,7 @@ type CurrencyAmountCardProps = {
   isAmountReadOnly?: boolean;
   isCurrencyLocked?: boolean;
   isAmountEmphasized?: boolean;
+  isAmountAutoFocused?: boolean;
 };
 
 export function CurrencyAmountCard({
@@ -33,7 +35,18 @@ export function CurrencyAmountCard({
   isAmountReadOnly = false,
   isCurrencyLocked = false,
   isAmountEmphasized = false,
+  isAmountAutoFocused = false,
 }: CurrencyAmountCardProps) {
+  const amountInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (!isAmountAutoFocused || isAmountReadOnly) {
+      return;
+    }
+
+    amountInputRef.current?.focus();
+  }, [isAmountAutoFocused, isAmountReadOnly]);
+
   return (
     <Card>
       <Title>{title}</Title>
@@ -46,7 +59,9 @@ export function CurrencyAmountCard({
           inputMode="decimal"
           value={amountValue}
           placeholder={amountPlaceholder}
+          ref={amountInputRef}
           readOnly={isAmountReadOnly}
+          tabIndex={isAmountReadOnly ? -1 : undefined}
           aria-readonly={isAmountReadOnly}
           $emphasized={isAmountEmphasized}
           onChange={(event) => onAmountChange?.(event.target.value)}
@@ -69,7 +84,7 @@ export function CurrencyAmountCard({
               </option>
             ))}
           </CurrencySelect>
-          <SelectChevron aria-hidden="true">▾</SelectChevron>
+          {!isCurrencyLocked ? <SelectChevron aria-hidden="true">▾</SelectChevron> : null}
         </SelectWrapper>
       </Field>
     </Card>

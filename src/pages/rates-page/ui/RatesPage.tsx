@@ -1,9 +1,12 @@
+import { useState } from "react";
 import styled from "styled-components";
 import { CurrencyConverter } from "../../../features/currency-converter";
 import { ThemeModeToggle } from "../../../features/theme-mode-toggle";
 import { ExchangeRatesList } from "../../../widgets/exchange-rates-list";
 
 export function RatesPage() {
+  const [selectedCurrencyCode, setSelectedCurrencyCode] = useState("");
+
   return (
     <Page>
       <Card>
@@ -13,8 +16,8 @@ export function RatesPage() {
           </div>
           <ThemeModeToggle />
         </Header>
-        <CurrencyConverter />
-        <ExchangeRatesList />
+        <CurrencyConverter onTargetCurrencyChange={setSelectedCurrencyCode} />
+        <ExchangeRatesList highlightedCurrencyCode={selectedCurrencyCode} />
       </Card>
     </Page>
   );

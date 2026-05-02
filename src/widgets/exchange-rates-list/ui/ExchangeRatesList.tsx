@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import styled from "styled-components";
 import { useRatesQuery } from "../../../entities/exchange-rate";
 import { getRateFlag } from "../../../shared/lib/rate-flag";
@@ -6,8 +7,33 @@ function formatRate(rate: number) {
   return rate.toFixed(3);
 }
 
-export function ExchangeRatesList() {
+type ExchangeRatesListProps = {
+  highlightedCurrencyCode?: string;
+};
+
+export function ExchangeRatesList({
+  highlightedCurrencyCode = "",
+}: ExchangeRatesListProps) {
   const { data, isPending, isError, error } = useRatesQuery();
+  const rows = useMemo(() => {
+    const sourceRows = data?.rows ?? [];
+
+    if (!highlightedCurrencyCode) {
+      return sourceRows;
+    }
+
+    return [...sourceRows].sort((left, right) => {
+      if (left.code === highlightedCurrencyCode) {
+        return -1;
+      }
+
+      if (right.code === highlightedCurrencyCode) {
+        return 1;
+      }
+
+      return 0;
+    });
+  }, [data, highlightedCurrencyCode]);
 
   if (isPending) {
     return <Message>Loading rates...</Message>;
@@ -18,7 +44,7 @@ export function ExchangeRatesList() {
       <ErrorMessage>
         Failed to load rates: {error instanceof Error ? error.message : "Unknown error"}
       </ErrorMessage>
-    );
+      );
   }
 
   return (
@@ -31,8 +57,11 @@ export function ExchangeRatesList() {
       </SectionHeader>
 
       <RatesList>
-        {data.rows.map((row) => (
-          <RateItem key={row.code}>
+        {rows.map((row) => (
+          <RateItem
+            key={row.code}
+            $highlighted={row.code === highlightedCurrencyCode}
+          >
             <Label>
               <Flag aria-hidden="true">{getRateFlag(row.country)}</Flag>
               {row.country} - {row.currency}
@@ -89,14 +118,18 @@ const RatesList = styled.ul`
   list-style: none;
 `;
 
-const RateItem = styled.li`
+const RateItem = styled.li<{ $highlighted: boolean }>`
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.itemGap};
   padding: ${({ theme }) => theme.spacing.itemPadding};
-  border: 1px solid ${({ theme }) => theme.colors.border};
+  border: 1px solid
+    ${({ theme, $highlighted }) =>
+      $highlighted ? theme.colors.accent : theme.colors.border};
   border-radius: ${({ theme }) => theme.radius.listItem};
+  box-shadow: ${({ theme, $highlighted }) =>
+    $highlighted ? `0 0 0 1px ${theme.colors.accent} inset` : "none"};
 
   @media (max-width: 720px) {
     grid-template-columns: 1fr;

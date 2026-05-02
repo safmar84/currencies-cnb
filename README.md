@@ -1,6 +1,6 @@
 # currencies-cnb
 
-React + TypeScript + Vite application for displaying CNB exchange rates and preparing a CZK currency converter.
+React + TypeScript + Vite application for displaying CNB exchange rates and converting CZK amounts.
 
 The project currently includes:
 
@@ -143,6 +143,7 @@ The current `features/` slice contains the theme mode toggle and the currency co
     │   │   │   ├── convert-czk-to-currency.ts
     │   │   │   └── index.ts
     │   │   └── ui/
+    │   │       ├── CurrencyAmountCard.test.tsx
     │   │       ├── CurrencyAmountCard.tsx
     │   │       └── CurrencyConverter.tsx
     │   └── theme-mode-toggle/
@@ -163,6 +164,10 @@ The current `features/` slice contains the theme mode toggle and the currency co
     │   │       ├── styled.d.ts
     │   │       └── theme.ts
     │   └── lib/
+    │       ├── rate-flag/
+    │       │   ├── index.ts
+    │       │   ├── rate-flag.test.ts
+    │       │   └── rate-flag.ts
     │       ├── rates-cache/
     │       │   ├── index.ts
     │       │   ├── rates-cache.test.ts
@@ -274,7 +279,10 @@ The test strategy is layered to match the current architecture:
 6. `src/features/currency-converter/model/convert-czk-to-currency.test.ts`
    - unit tests for the CZK-to-foreign-currency conversion formula
    - covers rates quoted per one unit and per multiple units
-7. `src/app/providers/theme/AppThemeProvider.test.tsx`
+7. `src/features/currency-converter/ui/CurrencyAmountCard.test.tsx`
+   - component tests for converter card interaction details
+   - covers autofocus, keyboard tab-order exclusion for the read-only result field, and disabled select chevron visibility
+8. `src/app/providers/theme/AppThemeProvider.test.tsx`
    - integration tests for theme mode behavior
    - covers restore from `localStorage`, persistence after change, `auto` mode, and reactions to `prefers-color-scheme` updates
 
@@ -285,8 +293,3 @@ src/shared/lib/testing/fixtures/rates.ts
 ```
 
 These fixtures are reused across parser, schema, and proxy tests to keep the payload contract consistent.
-
-## Planned next steps
-
-1. Refine the exchange rates UI
-2. Prepare deployment and final polish

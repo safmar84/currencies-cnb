@@ -31,7 +31,13 @@ function formatConvertedAmount(value: number | null) {
   return value.toFixed(3);
 }
 
-export function CurrencyConverter() {
+type CurrencyConverterProps = {
+  onTargetCurrencyChange?: (currencyCode: string) => void;
+};
+
+export function CurrencyConverter({
+  onTargetCurrencyChange,
+}: CurrencyConverterProps) {
   const { data, isPending, isError, error } = useRatesQuery();
   const [sourceAmount, setSourceAmount] = useState("");
   const [targetCurrency, setTargetCurrency] = useState("");
@@ -69,6 +75,10 @@ export function CurrencyConverter() {
     });
   }, [currencyOptions]);
 
+  useEffect(() => {
+    onTargetCurrencyChange?.(targetCurrency);
+  }, [onTargetCurrencyChange, targetCurrency]);
+
   if (isPending) {
     return <Message>Loading converter...</Message>;
   }
@@ -101,6 +111,7 @@ export function CurrencyConverter() {
           currencyValue="CZK"
           currencyOptions={[{ value: "CZK", label: "🇨🇿 CZK - Czech koruna" }]}
           onAmountChange={handleSourceAmountChange}
+          isAmountAutoFocused
           isCurrencyLocked
         />
 
