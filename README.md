@@ -115,7 +115,6 @@ The current `features/` slice contains the theme mode toggle and the currency co
 pnpm dev
 pnpm build
 pnpm test
-pnpm preview
 ```
 
 ## Setup
