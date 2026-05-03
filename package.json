@@ -6,7 +6,6 @@
   "packageManager": "pnpm@10.33.2",
   "scripts": {
     "dev": "netlify dev",
-    "dev:vite": "vite",
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "preview": "vite preview"

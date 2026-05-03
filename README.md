@@ -113,7 +113,6 @@ The current `features/` slice contains the theme mode toggle and the currency co
 
 ```bash
 pnpm dev
-pnpm dev:vite
 pnpm build
 pnpm test
 pnpm preview
@@ -131,12 +130,6 @@ Use Netlify dev as the default local entry point so the frontend and `/api/rates
 
 ```bash
 pnpm dev
-```
-
-If you only need the Vite frontend without the Netlify function layer:
-
-```bash
-pnpm dev:vite
 ```
 
 ## UI theme and tokens
