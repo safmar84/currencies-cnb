@@ -1,9 +1,13 @@
- [build]
-   command = "pnpm build"
-   publish = "dist"
-   functions = "netlify/functions"
- 
- [[redirects]]
-   from = "/api/rates"
-   to = "/.netlify/functions/rates"
-   status = 200
+[build]
+  command = "pnpm build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[dev]
+  command = "pnpm exec vite --port 5173"
+  targetPort = 5173
+
+[[redirects]]
+  from = "/api/rates"
+  to = "/.netlify/functions/rates"
+  status = 200
