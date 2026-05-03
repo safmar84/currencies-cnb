@@ -8,7 +8,13 @@ import { AppThemeProvider } from "./app/providers/theme";
 import App from "./App";
 import "./index.css";
 
-createRoot(document.getElementById("root")!).render(
+const rootElement = document.getElementById("root");
+
+if (!rootElement) {
+  throw new Error('Missing root element with id "root"');
+}
+
+createRoot(rootElement).render(
   <StrictMode>
     <AppThemeProvider>
       <QueryClientProvider client={queryClient}>

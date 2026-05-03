@@ -128,6 +128,7 @@ The current `features/` slice contains the theme mode toggle and the currency co
     │       │   ├── index.ts
     │       │   └── fetch-rates.ts
     │       ├── index.ts
+    │       ├── server.ts
     │       └── model/
     │           ├── index.ts
     │           ├── parser.test.ts

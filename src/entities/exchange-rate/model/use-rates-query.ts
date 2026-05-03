@@ -7,11 +7,11 @@ import {
 } from "../../../shared/lib/rates-cache";
 
 export function useRatesQuery() {
-  return useQuery({
+  return useQuery<Rates, Error>({
     queryKey: ["rates"],
     queryFn: fetchRates,
     staleTime: (query) => {
-      const data = query.state.data as Rates | undefined;
+      const data = query.state.data;
 
       if (!data) {
         return getRatesCacheTtlMilliseconds();

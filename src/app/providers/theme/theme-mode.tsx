@@ -8,6 +8,10 @@ import {
 
 export type ThemeMode = "auto" | "light" | "dark";
 
+export function isThemeMode(value: string | null): value is ThemeMode {
+  return value === "auto" || value === "light" || value === "dark";
+}
+
 type ThemeModeContextValue = {
   mode: ThemeMode;
   resolvedMode: Exclude<ThemeMode, "auto">;

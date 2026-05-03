@@ -7,7 +7,7 @@ import {
 import { ThemeProvider } from "styled-components";
 import { darkTheme, lightTheme } from "../../../shared/config/theme";
 import { GlobalStyle } from "./GlobalStyle";
-import { ThemeModeProvider, type ThemeMode } from "./theme-mode";
+import { ThemeModeProvider, isThemeMode, type ThemeMode } from "./theme-mode";
 
 const DARK_MODE_MEDIA_QUERY = "(prefers-color-scheme: dark)";
 const THEME_MODE_STORAGE_KEY = "currencies-cnb-theme-mode";
@@ -18,10 +18,6 @@ function getSystemPrefersDarkMode() {
   }
 
   return window.matchMedia(DARK_MODE_MEDIA_QUERY).matches;
-}
-
-function isThemeMode(value: string | null): value is ThemeMode {
-  return value === "auto" || value === "light" || value === "dark";
 }
 
 function getStoredThemeMode(): ThemeMode {

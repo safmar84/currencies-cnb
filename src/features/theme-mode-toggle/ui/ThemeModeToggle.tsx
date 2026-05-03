@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import {
+  isThemeMode,
   useThemeMode,
   type ThemeMode
 } from "../../../app/providers/theme";
@@ -12,6 +13,14 @@ const options: Array<{ value: ThemeMode; label: string }> = [
 
 export function ThemeModeToggle() {
   const { mode, setMode } = useThemeMode();
+
+  function handleSelectChange(value: string) {
+    if (!isThemeMode(value)) {
+      throw new Error(`Unexpected theme mode value: ${value}`);
+    }
+
+    setMode(value);
+  }
 
   return (
     <ToggleGroup
@@ -37,7 +46,7 @@ export function ThemeModeToggle() {
       <HiddenSelect
         aria-label="Theme mode"
         value={mode}
-        onChange={(event) => setMode(event.target.value as ThemeMode)}
+        onChange={(event) => handleSelectChange(event.currentTarget.value)}
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>

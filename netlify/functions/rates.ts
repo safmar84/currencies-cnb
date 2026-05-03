@@ -1,5 +1,5 @@
 import type { Handler } from "@netlify/functions";
-import { parseRates, type Rates } from "../../src/entities/exchange-rate";
+import { parseRates, type Rates } from "../../src/entities/exchange-rate/server";
 import {
   buildRatesCacheControlHeader,
   getRatesCacheExpiresAt,
