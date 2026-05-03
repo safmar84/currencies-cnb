@@ -18,12 +18,13 @@ declare module "styled-components" {
       pagePadding: string;
       cardPadding: string;
       eyebrowMarginBottom: string;
-      titleMarginBottom: string;
       metaMarginBottom: string;
       listGap: string;
       itemGap: string;
       itemPadding: string;
       controlGap: string;
+      cardTitleOffset: string;
+      selectChevronSpace: string;
       togglePaddingX: string;
       togglePaddingY: string;
     };
@@ -34,12 +35,15 @@ declare module "styled-components" {
     };
     layout: {
       cardMaxWidth: string;
+      minViewportWidth: string;
+      compactBreakpoint: string;
+      directionIndicatorSize: string;
     };
     typography: {
       eyebrowSize: string;
-      titleSize: string;
-      codeSize: string;
       controlSize: string;
+      sectionTitleSize: string;
+      indicatorSize: string;
     };
     shadow: {
       card: string;

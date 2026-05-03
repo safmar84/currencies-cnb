@@ -83,7 +83,7 @@ const SectionHeader = styled.header`
   gap: ${({ theme }) => theme.spacing.listGap};
   margin: 0 0 ${({ theme }) => theme.spacing.metaMarginBottom};
 
-  @media (max-width: 720px) {
+  @media (max-width: ${({ theme }) => theme.layout.compactBreakpoint}) {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -92,7 +92,7 @@ const SectionHeader = styled.header`
 const SectionTitle = styled.h2`
   margin: 0;
   color: ${({ theme }) => theme.colors.text};
-  font-size: 1.25rem;
+  font-size: ${({ theme }) => theme.typography.sectionTitleSize};
 `;
 
 const Meta = styled.p`
@@ -131,7 +131,7 @@ const RateItem = styled.li<{ $highlighted: boolean }>`
   box-shadow: ${({ theme, $highlighted }) =>
     $highlighted ? `0 0 0 1px ${theme.colors.accent} inset` : "none"};
 
-  @media (max-width: 720px) {
+  @media (max-width: ${({ theme }) => theme.layout.compactBreakpoint}) {
     grid-template-columns: 1fr;
     align-items: start;
   }
@@ -153,7 +153,7 @@ const Rate = styled.span`
   font-weight: 600;
   text-align: right;
 
-  @media (max-width: 720px) {
+  @media (max-width: ${({ theme }) => theme.layout.compactBreakpoint}) {
     text-align: left;
   }
 `;

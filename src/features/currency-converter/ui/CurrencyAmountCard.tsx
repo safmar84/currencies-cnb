@@ -96,7 +96,7 @@ const Card = styled.section`
   display: grid;
   gap: ${({ theme }) => theme.spacing.listGap};
   padding: ${({ theme }) =>
-    `calc(${theme.spacing.itemPadding} + 0.5rem) ${theme.spacing.itemPadding} ${theme.spacing.itemPadding}`};
+    `calc(${theme.spacing.itemPadding} + ${theme.spacing.cardTitleOffset}) ${theme.spacing.itemPadding} ${theme.spacing.itemPadding}`};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.radius.listItem};
   background: ${({ theme }) => theme.colors.surface};
@@ -156,7 +156,9 @@ const SelectWrapper = styled.div`
 const CurrencySelect = styled.select`
   ${sharedControlStyles}
   appearance: none;
-  padding-right: calc(${({ theme }) => theme.spacing.itemPadding} * 2 + 1rem);
+  padding-right: calc(
+    ${({ theme }) => theme.spacing.itemPadding} * 2 + ${({ theme }) => theme.spacing.selectChevronSpace}
+  );
 
   &:disabled {
     background: ${({ theme }) => theme.colors.subtleSurface};

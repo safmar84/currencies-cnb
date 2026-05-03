@@ -25,7 +25,7 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   body {
-    min-width: 320px;
+    min-width: ${({ theme }) => theme.layout.minViewportWidth};
     background: ${({ theme }) => theme.colors.background};
     color: ${({ theme }) => theme.colors.text};
   }

@@ -142,7 +142,7 @@ const Section = styled.section`
 const SectionTitle = styled.h2`
   margin: 0 0 ${({ theme }) => theme.spacing.metaMarginBottom};
   color: ${({ theme }) => theme.colors.text};
-  font-size: 1.25rem;
+  font-size: ${({ theme }) => theme.typography.sectionTitleSize};
 `;
 
 const Cards = styled.div`
@@ -151,7 +151,7 @@ const Cards = styled.div`
   align-items: center;
   gap: ${({ theme }) => theme.spacing.listGap};
 
-  @media (max-width: 720px) {
+  @media (max-width: ${({ theme }) => theme.layout.compactBreakpoint}) {
     grid-template-columns: 1fr;
   }
 `;
@@ -159,23 +159,23 @@ const Cards = styled.div`
 const DirectionArrow = styled.div`
   display: grid;
   place-items: center;
-  inline-size: 3rem;
-  block-size: 3rem;
+  inline-size: ${({ theme }) => theme.layout.directionIndicatorSize};
+  block-size: ${({ theme }) => theme.layout.directionIndicatorSize};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 999px;
+  border-radius: ${({ theme }) => theme.radius.control};
   background: ${({ theme }) => theme.colors.subtleSurface};
   color: ${({ theme }) => theme.colors.mutedText};
 
-  @media (max-width: 720px) {
+  @media (max-width: ${({ theme }) => theme.layout.compactBreakpoint}) {
     justify-self: center;
   }
 `;
 
 const ArrowGlyph = styled.span`
-  font-size: 1.5rem;
+  font-size: ${({ theme }) => theme.typography.indicatorSize};
   line-height: 1;
 
-  @media (max-width: 720px) {
+  @media (max-width: ${({ theme }) => theme.layout.compactBreakpoint}) {
     transform: rotate(90deg);
   }
 `;
