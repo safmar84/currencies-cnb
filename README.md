@@ -13,30 +13,7 @@ The project currently includes:
 - automatic and manual light/dark theme switching (`auto` / `light` / `dark`)
 - semantic UI tokens for colors, spacing, radius, layout, typography, and shadow
 - current UI that loads, converts, and renders exchange rates
-- unit and integration tests for parser, schema, frontend API client, Netlify proxy, theme behavior, and conversion logic
-
-## Assignment
-
-Create a simple React app (don’t use NextJS please), which:
-
-1. When it starts, retrieve the latest currency exchange rates from the Czech National Bank.
-
-API URL: https://www.cnb.cz/en/financial-markets/foreign-exchange-market/central-bank-exchange-rate-fixing/central-bank-exchange-rate-fixing/daily.txt
-
-Documentation: https://www.cnb.cz/en/faq/Format-of-the-foreign-exchange-market-rates/
-
-2. Parses the downloaded data and clearly displays a list to the user in the UI.
-
-3. Add a simple form, into which the customer can enter an amount in CZK and select a currency, and after submitting (clicking a button or in real-time) sees the amount entered in CZK converted into the selected currency.
-
-4. Commit your code throughout your work and upload the resulting codebase into a Github repo.
-
-5. Deploy the app so it can be viewed online (it doesn’t matter where - e.q. Vercel, Netflify, etc.).
-6. Add automated tests which might be appropriate to ensure that your solution is working correctly.
-
-7. Tech stack: React (+ Hooks), TypeScript, Styled Components, React Query.
-
-Overall: Keep the code simple and the UI nice and easy to use for the user.
+- unit, component, and integration tests for parser, schema, frontend API client, Netlify proxy, theme behavior, rates-list/page wiring, and conversion logic
 
 ## Architecture
 
@@ -51,7 +28,7 @@ The application is split into these responsibilities:
 3. **Widgets layer (`src/widgets`)**
    - contains larger UI blocks such as the exchange rates list
 4. **Entities layer (`src/entities/exchange-rate`)**
-   - contains the exchange-rate domain contract, parser, API client, and React Query hook
+   - contains the exchange-rate domain contract, parser, API client, React Query hook, and a server-safe parser entrypoint for the Netlify function
 5. **Shared layer (`src/shared`)**
    - stores shared testing fixtures and theme configuration
    - exposes semantic UI tokens used by the styled-components theme
@@ -65,35 +42,26 @@ The application is split into these responsibilities:
 
 The current `features/` slice contains the theme mode toggle and the currency converter feature.
 
-### Architectural patterns in use
+### Architectural decisions
 
-- **Layered architecture**
-  - UI, data fetching, proxy/backend, and parsing/validation have clearly separated responsibilities
-- **Feature-Sliced Design direction**
-   - the code is organized into `app / pages / widgets / features / entities / shared`
-   - the current domain logic lives in `entities/exchange-rate`, while user actions such as theme switching and currency conversion belong in `features`
+- **Layered architecture + FSD direction**
+  - the code is organized into `app / pages / widgets / features / entities / shared`
+  - UI composition, user-facing behavior, domain logic, and shared infrastructure stay clearly separated
 - **Proxy / BFF-lite**
   - the frontend does not call the CNB TXT endpoint directly
-  - Netlify Functions expose a stable `/api/rates` interface tailored to the UI
+  - Netlify Functions expose a stable `/api/rates` interface tailored to the UI and avoid browser-side CORS concerns
+- **Adapter + Zod validation**
+  - `parseRates()` isolates the application from the raw CNB TXT format and converts it into an internal typed contract
+  - `RatesSchema` adds runtime safety for external data at both the backend and frontend boundaries
 - **Daily-aware caching**
   - both frontend and backend use the same refresh window derived from the CNB schedule
-  - rates stay cached until the next expected working-day update around 2:30 p.m. Prague time
-- **Adapter / anti-corruption layer**
-  - `parseRates()` isolates the application from the raw external TXT format and converts it into an internal typed contract
-- **Theme tokens + system theme detection**
-  - semantic UI tokens are defined once and consumed across the UI
-  - the app follows the OS light/dark preference through `prefers-color-scheme` in `auto` mode and supports a persisted manual override
-
-### Why these choices
-
-- **Vite** keeps the frontend setup simple and lightweight
-- **React Query** handles async state, caching, and retry behavior cleanly
-- **Netlify Functions** provide a minimal proxy/backend layer without introducing a full backend framework
-- **Daily-aware caching** avoids repeatedly calling the CNB endpoint even though rates change only once per working day
-- **Zod** adds runtime safety for external data coming from the CNB endpoint
-- **Semantic theme tokens** keep spacing, typography, radius, layout, and colors centralized
-- **System light/dark detection + manual override** improve UX while keeping the theme logic simple
-- **Shared test fixtures** keep parser, schema, API client, and proxy tests aligned around the same payload contract
+  - this avoids repeatedly calling the CNB endpoint even though rates change only once per working day
+- **Semantic theme tokens + theme mode**
+  - visual decisions live in shared semantic theme tokens instead of scattered component-level values
+  - the app supports `auto`, `light`, and `dark` modes with OS preference detection and persisted manual override
+- **Shared fixtures and layered tests**
+  - shared fixtures keep parser, schema, API client, and proxy tests aligned around the same payload contract
+  - the current test suite mixes unit, component, and integration tests to match the architecture without adding a heavier browser-test stack yet
 
 ### Project structure
 
@@ -102,7 +70,6 @@ The current `features/` slice contains the theme mode toggle and the currency co
 ├── index.html
 ├── netlify/
 │   └── functions/
-│       ├── rates.test.ts
 │       └── rates.ts
 ├── netlify.toml
 ├── package.json
@@ -110,79 +77,36 @@ The current `features/` slice contains the theme mode toggle and the currency co
 ├── vite.config.ts
 └── src
     ├── App.tsx
+    ├── main.tsx
     ├── app/
     │   └── providers/
     │       ├── query-client/
-    │       │   ├── index.ts
-    │       │   └── query-client.ts
     │       └── theme/
-    │           ├── AppThemeProvider.test.tsx
-    │           ├── AppThemeProvider.tsx
-    │           ├── GlobalStyle.tsx
-    │           ├── index.ts
-    │           └── theme-mode.tsx
     ├── entities/
     │   └── exchange-rate/
-    │       ├── api/
-    │       │   ├── fetch-rates.test.ts
-    │       │   ├── index.ts
-    │       │   └── fetch-rates.ts
     │       ├── index.ts
+    │       ├── api/
+    │       ├── model/
     │       ├── server.ts
-    │       └── model/
-    │           ├── index.ts
-    │           ├── parser.test.ts
-    │           ├── parser.ts
-    │           ├── types.test.ts
-    │           ├── types.ts
-    │           └── use-rates-query.ts
     ├── features/
     │   ├── currency-converter/
-    │   │   ├── index.ts
     │   │   ├── model/
-    │   │   │   ├── convert-czk-to-currency.test.ts
-    │   │   │   ├── convert-czk-to-currency.ts
-    │   │   │   └── index.ts
     │   │   └── ui/
-    │   │       ├── CurrencyAmountCard.test.tsx
-    │   │       ├── CurrencyAmountCard.tsx
-    │   │       └── CurrencyConverter.tsx
     │   └── theme-mode-toggle/
-    │       ├── index.ts
     │       └── ui/
-    │           └── ThemeModeToggle.tsx
-    ├── index.css
-    ├── main.tsx
     ├── pages/
     │   └── rates-page/
-    │       ├── index.ts
     │       └── ui/
-    │           └── RatesPage.tsx
     ├── shared/
     │   ├── config/
     │   │   └── theme/
-    │   │       ├── index.ts
-    │   │       ├── styled.d.ts
-    │   │       └── theme.ts
     │   └── lib/
     │       ├── rate-flag/
-    │       │   ├── index.ts
-    │       │   ├── rate-flag.test.ts
-    │       │   └── rate-flag.ts
     │       ├── rates-cache/
-    │       │   ├── index.ts
-    │       │   ├── rates-cache.test.ts
-    │       │   └── rates-cache.ts
     │       └── testing/
-    │           └── fixtures/
-    │               ├── index.ts
-    │               └── rates.ts
-    ├── vite-env.d.ts
     └── widgets/
         └── exchange-rates-list/
-            ├── index.ts
             └── ui/
-                └── ExchangeRatesList.tsx
 ```
 
 ## Scripts
@@ -295,6 +219,9 @@ The test strategy is layered to match the current architecture:
 11. `src/app/providers/theme/AppThemeProvider.test.tsx`
    - integration tests for theme mode behavior
    - covers restore from `localStorage`, persistence after change, `auto` mode, and reactions to `prefers-color-scheme` updates
+12. `src/shared/lib/rate-flag/rate-flag.test.ts`
+   - unit tests for country-to-emoji mapping
+   - covers normal countries, CNB special entries such as `EMU` and `IMF`, and the unknown-country fallback
 
 Shared happy-path fixtures live in:
 
@@ -305,3 +232,28 @@ src/shared/lib/testing/fixtures/rates.ts
 These fixtures are reused across parser, schema, and proxy tests to keep the payload contract consistent.
 
 If the project grows to include more complex browser-specific interactions, richer responsive behavior, or longer user journeys, it would be reasonable to add a small set of browser-level component tests and/or Playwright end-to-end tests for the most critical flows.
+
+TypeScript runs in `strict` mode for both the frontend (`src`) and the Netlify function layer (`netlify/functions`).
+
+## Assignment (from Momence)
+
+Create a simple React app (don’t use NextJS please), which:
+
+1. When it starts, retrieve the latest currency exchange rates from the Czech National Bank.
+
+API URL: https://www.cnb.cz/en/financial-markets/foreign-exchange-market/central-bank-exchange-rate-fixing/central-bank-exchange-rate-fixing/daily.txt
+
+Documentation: https://www.cnb.cz/en/faq/Format-of-the-foreign-exchange-market-rates/
+
+2. Parses the downloaded data and clearly displays a list to the user in the UI.
+
+3. Add a simple form, into which the customer can enter an amount in CZK and select a currency, and after submitting (clicking a button or in real-time) sees the amount entered in CZK converted into the selected currency.
+
+4. Commit your code throughout your work and upload the resulting codebase into a Github repo.
+
+5. Deploy the app so it can be viewed online (it doesn’t matter where - e.q. Vercel, Netflify, etc.).
+6. Add automated tests which might be appropriate to ensure that your solution is working correctly.
+
+7. Tech stack: React (+ Hooks), TypeScript, Styled Components, React Query.
+
+Overall: Keep the code simple and the UI nice and easy to use for the user.
