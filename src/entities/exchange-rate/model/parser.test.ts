@@ -32,6 +32,13 @@ Australia|dollar|1|AUD|14.909`),
     ).toThrow("Unexpected CNB date line format");
   });
 
+  it("throws when the date line is missing", () => {
+    expect(() =>
+      parseRates(`Country|Currency|Amount|Code|Rate
+Australia|dollar|1|AUD|14.909`),
+    ).toThrow("Unexpected CNB header line format");
+  });
+
   it("throws when a data row has an unexpected column count", () => {
     expect(() =>
       parseRates(`27 Apr 2026 #80

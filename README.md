@@ -283,7 +283,16 @@ The test strategy is layered to match the current architecture:
 7. `src/features/currency-converter/ui/CurrencyAmountCard.test.tsx`
    - component tests for converter card interaction details
    - covers autofocus, keyboard tab-order exclusion for the read-only result field, and disabled select chevron visibility
-8. `src/app/providers/theme/AppThemeProvider.test.tsx`
+8. `src/features/currency-converter/ui/CurrencyConverter.test.tsx`
+   - component tests for converter behavior
+   - covers default target selection, fallback target selection, reactive recalculation, input filtering, and target-currency change notifications
+9. `src/widgets/exchange-rates-list/ui/ExchangeRatesList.test.tsx`
+   - component tests for the rates list widget
+   - covers loading, error rendering, published metadata, and highlighted-currency ordering
+10. `src/pages/rates-page/ui/RatesPage.test.tsx`
+   - thin page-level integration test
+   - verifies that converter target selection is propagated into the exchange-rates highlight ordering
+11. `src/app/providers/theme/AppThemeProvider.test.tsx`
    - integration tests for theme mode behavior
    - covers restore from `localStorage`, persistence after change, `auto` mode, and reactions to `prefers-color-scheme` updates
 
@@ -294,3 +303,5 @@ src/shared/lib/testing/fixtures/rates.ts
 ```
 
 These fixtures are reused across parser, schema, and proxy tests to keep the payload contract consistent.
+
+If the project grows to include more complex browser-specific interactions, richer responsive behavior, or longer user journeys, it would be reasonable to add a small set of browser-level component tests and/or Playwright end-to-end tests for the most critical flows.
