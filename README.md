@@ -69,8 +69,10 @@ The current `features/` slice contains the theme mode toggle and the currency co
 .
 ├── index.html
 ├── netlify/
-│   └── functions/
-│       └── rates.ts
+│   ├── functions/
+│   │   └── rates.ts
+│   └── tests/
+│       └── rates.test.ts
 ├── netlify.toml
 ├── package.json
 ├── tsconfig.json
@@ -187,7 +189,7 @@ The test strategy is layered to match the current architecture:
 3. `src/entities/exchange-rate/api/fetch-rates.test.ts`
    - frontend API client tests for `fetchRates()`
    - verifies `/api/rates` is called and the JSON response is validated
-4. `netlify/functions/rates.test.ts`
+4. `netlify/tests/rates.test.ts`
    - proxy tests for the Netlify handler
    - covers successful upstream fetch, in-memory cache reuse, cache expiry, 5-minute stale-data caching after the expected publish time, non-OK upstream response, thrown fetch errors, and invalid upstream payloads
 5. `src/shared/lib/rates-cache/rates-cache.test.ts`

@@ -8,7 +8,7 @@ import {
   buildRatesCacheControlHeader,
   getRatesCacheExpiresAt,
 } from "../../src/shared/lib/rates-cache";
-import { handler, resetRatesCacheForTests } from "./rates";
+import { handler, resetRatesCacheForTests } from "../functions/rates";
 import {
   validDailyRates,
   validDailyRatesText,

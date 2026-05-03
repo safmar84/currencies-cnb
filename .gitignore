@@ -7,5 +7,7 @@ vite.config.d.ts
 
 # Local Netlify folder
 .netlify
+netlify/functions/*.zip
+netlify/functions/manifest.json
 
 deno.lock
